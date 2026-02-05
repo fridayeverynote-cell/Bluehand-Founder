@@ -25,8 +25,3 @@ st_folium(m, width=1000, height=600)
 m = folium.Map([41.97, 2.81])
 
 st.title("서울권 센터")
-
-
-
-
-

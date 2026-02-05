@@ -36,7 +36,7 @@ regions = {
 all_data = []
 
 print("🔧 전체 데이터 수집 시작")
-
+   # 도명
 for region_alias, region_full_name in regions.items():
     print(f"\n🔄 [{region_alias}] 수집 시작")
 
