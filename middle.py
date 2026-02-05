@@ -1,4 +1,5 @@
 import os
+import math
 import streamlit as st
 import mysql.connector
 import pandas as pd
@@ -38,6 +39,100 @@ DB_CONFIG = {
     "charset": "utf8mb4",
 }
 
+PAGE_SIZE = 5
+
+def _service_text_from_row(row: dict) -> str:
+    # middle.py의 FILTER_OPTIONS 기준: row에서 1인 항목만 라벨로 합침 :contentReference[oaicite:1]{index=1}
+    labels = [label for col, label in FILTER_OPTIONS.items() if row.get(col) == 1]
+    return " · ".join(labels)
+
+def render_hy_table_page(rows_page: list[dict]):
+    css = """
+    <style>
+      table.hy { width:100%; border-collapse:collapse; table-layout:fixed; }
+      table.hy thead th{
+        background:#0b3b68; color:#fff; padding:12px 10px; text-align:center;
+        font-weight:800; border:1px solid #ffffff33; font-size:14px;
+      }
+      table.hy tbody td{
+        border:1px solid #e6e6e6; padding:14px 12px; vertical-align:middle;
+        font-size:14px; background:#fff; word-break:break-word;
+      }
+      .c-name{ width:22%; text-align:center; font-weight:800; }
+      .c-addr{ width:48%; text-align:center; }
+      .c-phone{ width:15%; text-align:center; }
+      .c-svc{ width:15%; text-align:center; }
+      .svc{ font-weight:800; color:#0b3b68; }
+      .muted{ color:#777; }
+    </style>
+    """
+
+    def s(x): return "" if x is None else str(x)
+
+    trs = []
+    for r in rows_page:
+        name = s(r.get("name"))
+        addr = s(r.get("address"))
+        phone = s(r.get("phone"))
+        svc = _service_text_from_row(r)
+        svc_html = f'<span class="svc">{svc}</span>' if svc else '<span class="muted">-</span>'
+
+        trs.append(f"""
+          <tr>
+            <td class="c-name">{name}</td>
+            <td class="c-addr">{addr}</td>
+            <td class="c-phone">{phone}</td>
+            <td class="c-svc">{svc_html}</td>
+          </tr>
+        """)
+
+    html = f"""
+    {css}
+    <table class="hy">
+      <thead>
+        <tr>
+          <th>업체명</th>
+          <th>주소</th>
+          <th>전화번호</th>
+          <th>서비스 옵션</th>
+        </tr>
+      </thead>
+      <tbody>
+        {''.join(trs) if trs else '<tr><td colspan="4" style="text-align:center;padding:16px;">검색 결과가 없습니다.</td></tr>'}
+      </tbody>
+    </table>
+    """
+    components.html(html, height=120 + 62 * max(1, len(rows_page)), scrolling=False)
+
+def render_paginated_table(rows_all: list[dict]):
+    total = len(rows_all)
+    total_pages = max(1, math.ceil(total / PAGE_SIZE))
+
+    if "page" not in st.session_state:
+        st.session_state.page = 1
+
+    page_now = st.session_state.page
+    start = (page_now - 1) * PAGE_SIZE
+    end = start + PAGE_SIZE
+
+    # 1) 표 출력
+    render_hy_table_page(rows_all[start:end])
+
+    # 2) 표 바로 아래 + 중앙정렬 페이지 토글
+    left, center, right = st.columns([1, 2, 1])
+    with center:
+        selected = st.radio(
+            label="",
+            options=list(range(1, total_pages + 1)),
+            index=page_now - 1,
+            horizontal=True,
+            key="page_radio",
+        )
+
+    # 3) 선택 변경 반영
+    if selected != page_now:
+        st.session_state.page = selected
+        st.rerun()
 
 def get_conn():
     return mysql.connector.connect(**DB_CONFIG)
@@ -239,7 +334,7 @@ if should_search:
 
     if data_list:
         df = pd.DataFrame(data_list)
-        st.dataframe(df[["name", "address", "phone"]], use_container_width=True, hide_index=True)
+        render_paginated_table(data_list)
 else:
     st.info("👈 왼쪽 사이드바에서 지역을 선택하거나, 👆 위에서 검색어를 입력하세요.")
 

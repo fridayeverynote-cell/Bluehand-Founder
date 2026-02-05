@@ -27,7 +27,7 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "root")  # 로컬 테스트용. git
 MYSQL_DB = os.getenv("MYSQL_DB", "bluehands_db")
 CSV_PATH = os.getenv(
     "CSV_PATH",
-    r"C:\team_pj\Bluehand-Founde\bluehands_final_all.csv"
+    r"C:\lecture\Bluehand_Founder\bluehands_final_all.csv"
 )
 
 

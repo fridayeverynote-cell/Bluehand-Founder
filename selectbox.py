@@ -7,7 +7,7 @@ st.title("📊 DB 테이블 보기 + 가까운 지점 4곳")
 conn = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="mysql",
+    password="root",
     database="bluehands_db",
     charset="utf8mb4"
 )
