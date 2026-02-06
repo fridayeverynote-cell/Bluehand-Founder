@@ -25,34 +25,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",  # 사이드바를 기본적으로 펼침
 )
 
-<<<<<<< HEAD
-# Streamlit 페이지 하단 라디오 블록 정렬용
-st.markdown("""
-<style>
-/* 라디오 블록 자체를 페이지 폭 기준으로 가운데 정렬 */
-.pagination-wrap {
-  width: 100%;
-  display: flex;
-  justify-content: center;   /* body 기준 가로 중앙 */
-  align-items: center;
-  margin-top: 8px;
-}
-
-/* Streamlit radio 컨테이너가 기본적으로 좌측 정렬되는 걸 강제 중앙정렬 */
-.pagination-wrap [role="radiogroup"]{
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center;
-}
-
-/* 라디오 각 아이템 간 간격(선택) */
-.pagination-wrap label{
-  margin-right: 10px !important;
-}
-.pagination-wrap label:last-child{
-  margin-right: 0 !important;
-}
-=======
 # [CSS] 전체 디자인 커스텀 (폰트, 여백, 카드 스타일, 페이지네이션 정렬 등)
 st.markdown("""
 <style>
@@ -197,7 +169,6 @@ st.markdown("""
         justify-content: center !important;
         align-items: center !important;
     }
->>>>>>> ce0b04b64b0d7aa7d6e20cca483324fef8e4e3c7
 </style>
 """, unsafe_allow_html=True)
 
@@ -226,132 +197,9 @@ DB_CONFIG = {
 PAGE_SIZE = 5
 
 
-<<<<<<< HEAD
-def _service_text_from_row(row: dict) -> str:
-    """
-    DB에서 가져온 행(row) 데이터 중 값이 1인 필터 항목만 추출하여
-    화면에 보여줄 문자열(예: 전기차 전담 · 우수 협력점)로 변환합니다.
-    """
-    labels = [label for col, label in FILTER_OPTIONS.items() if row.get(col) == 1]
-    return " · ".join(labels)
-
-
-def render_hy_table_page(rows_page: list[dict]):
-    """
-    데이터 리스트를 받아 HTML 테이블 형태로 렌더링하는 함수입니다.
-    Streamlit 기본 데이터프레임보다 더 예쁜 디자인을 위해 HTML/CSS를 직접 사용합니다.
-    """
-    # 테이블 스타일 정의 (CSS)
-    css = """
-    <style>
-      table.hy { width:100%; border-collapse:collapse; table-layout:fixed; }
-      table.hy thead th{
-        background:#0b3b68; color:#fff; padding:12px 10px; text-align:center;
-        font-weight:800; border:1px solid #ffffff33; font-size:14px;
-      }
-      table.hy tbody td{
-        border:1px solid #e6e6e6; padding:14px 12px; vertical-align:middle;
-        font-size:14px; background:#fff; word-break:break-word;
-      }
-      .c-name{ width:22%; text-align:center; font-weight:800; }
-      .c-addr{ width:48%; text-align:center; }
-      .c-phone{ width:15%; text-align:center; }
-      .c-svc{ width:15%; text-align:center; }
-      .svc{ font-weight:800; color:#0b3b68; }
-      .muted{ color:#777; }
-    </style>
-    """
-
-    def s(x): return "" if x is None else str(x)  # None 값을 빈 문자열로 처리하는 헬퍼
-
-    # 각 행 데이터를 HTML <tr> 태그로 변환
-    trs = []
-    for r in rows_page:
-        name = s(r.get("name"))
-        addr = s(r.get("address"))
-        phone = s(r.get("phone"))
-        svc = _service_text_from_row(r)
-        svc_html = f'<span class="svc">{svc}</span>' if svc else '<span class="muted">-</span>'
-
-        trs.append(f"""
-          <tr>
-            <td class="c-name">{name}</td>
-            <td class="c-addr">{addr}</td>
-            <td class="c-phone">{phone}</td>
-            <td class="c-svc">{svc_html}</td>
-          </tr>
-        """)
-
-    # 최종 HTML 조립
-    html = f"""
-    {css}
-    <table class="hy">
-      <thead>
-        <tr>
-          <th>업체명</th>
-          <th>주소</th>
-          <th>전화번호</th>
-          <th>서비스 옵션</th>
-        </tr>
-      </thead>
-      <tbody>
-        {''.join(trs) if trs else '<tr><td colspan="4" style="text-align:center;padding:16px;">검색 결과가 없습니다.</td></tr>'}
-      </tbody>
-    </table>
-    """
-    # Streamlit 컴포넌트로 HTML 렌더링 (높이는 데이터 개수에 따라 자동 조절)
-    components.html(html, height=120 + 62 * max(1, len(rows_page)), scrolling=False)
-
-
-def render_paginated_table(rows_all: list[dict]):
-    """
-    전체 데이터를 받아 페이지네이션(페이지 나누기) 처리를 하고 테이블을 출력하는 함수입니다.
-    """
-    total = len(rows_all)
-    # 전체 페이지 수 계산 (올림 처리)
-    total_pages = max(1, math.ceil(total / PAGE_SIZE))
-
-    # 세션 상태(session_state)에 현재 페이지 번호가 없으면 1로 초기화
-    if "page" not in st.session_state:
-        st.session_state.page = 1
-
-    # 현재 페이지 번호가 유효 범위를 벗어나지 않도록 보정 (검색 결과가 줄어들었을 때 에러 방지)
-    st.session_state.page = max(1, min(st.session_state.page, total_pages))
-    page_now = st.session_state.page
-
-    # 현재 페이지에 해당하는 데이터 슬라이싱 (start ~ end)
-    start = (page_now - 1) * PAGE_SIZE
-    end = start + PAGE_SIZE
-
-    # 슬라이싱된 데이터로 테이블 렌더링 함수 호출
-    render_hy_table_page(rows_all[start:end])
-
-    # 페이지 번호 선택 버튼 생성 (라디오 버튼 활용)
-    options = list(range(1, total_pages + 1))
-    index = options.index(page_now)  # 현재 페이지의 인덱스 찾기
-
-
-    # UI 레이아웃: 중앙 정렬을 위해 컬럼 분할
-    left, center, right = st.columns([1, 2, 1])
-    with center:
-        selected = st.radio(
-            label="",
-            options=options,
-            index=index,
-            horizontal=True,  # 가로로 배치
-            key="page_radio",
-        )
-
-    # 사용자가 다른 페이지를 선택하면 세션 상태 업데이트 후 화면 리로드(rerun)
-    if selected != page_now:
-        st.session_state.page = selected
-        st.rerun()
-
-=======
 # -----------------------------------------------------------------------------
 # 2. 헬퍼 함수 정의
 # -----------------------------------------------------------------------------
->>>>>>> ce0b04b64b0d7aa7d6e20cca483324fef8e4e3c7
 
 def get_conn():
     """DB 연결 객체를 생성하여 반환합니다."""
@@ -614,7 +462,7 @@ def get_regions():
     try:
         conn = get_conn()
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM regions ORDER BY id")
+        cursor.execute("SELECT name FROM bluehands_db.regions ORDER BY id")
         return [row[0] for row in cursor.fetchall()]
     except:
         return []
