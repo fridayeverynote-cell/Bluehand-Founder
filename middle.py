@@ -267,6 +267,13 @@ DB_CONFIG = {
 
 PAGE_SIZE = 5
 
+# 최근 클릭한 센터(최대 5개) 저장
+if "clicked_centers" not in st.session_state:
+    st.session_state.clicked_centers = {}  # {bluehands_id: {"id":.., "name":.., "count":..}}
+
+if "last_click_key" not in st.session_state:
+    st.session_state.last_click_key = None
+
 # -----------------------------------------------------------------------------
 # 2. 헬퍼 함수
 # -----------------------------------------------------------------------------
@@ -560,6 +567,37 @@ def get_bluehands_data(search_text, selected_filters, region_filter):
         if conn:
             conn.close()
 
+def find_clicked_center_by_latlng(clicked_lat, clicked_lng, rows, tol=1e-6):
+    """
+    st_folium이 준 클릭좌표(clicked_lat/lng)를 rows(data_list) 안의 지점과 매칭.
+    - 정확히 같으면 바로 매칭
+    - 아니면 가장 가까운(거리 최소) 지점 선택
+    """
+    if clicked_lat is None or clicked_lng is None:
+        return None
+
+    best = None
+    best_d = float("inf")
+
+    for r in rows:
+        try:
+            lat = float(r.get("latitude"))
+            lng = float(r.get("longitude"))
+        except:
+            continue
+
+        # (1) 거의 동일 좌표면 즉시 매칭
+        if abs(lat - clicked_lat) < tol and abs(lng - clicked_lng) < tol:
+            return r
+
+        # (2) 아니면 가장 가까운 것 선택 (단순 제곱거리)
+        d = (lat - clicked_lat) ** 2 + (lng - clicked_lng) ** 2
+        if d < best_d:
+            best_d = d
+            best = r
+
+    return best
+
 # -----------------------------------------------------------------------------
 # 5. 메인 UI
 # -----------------------------------------------------------------------------
@@ -605,6 +643,30 @@ with st.sidebar:
         if st.button("검색", type="primary", use_container_width=True):
             scroll_down()
 
+    top5_placeholder = st.empty()
+
+    def render_top5(ph):
+        with ph.container():
+            st.write("---")
+            st.markdown("### 📌 많이 클릭한 센터 TOP 5")
+
+            if not st.session_state.clicked_centers:
+                st.caption("지도에서 핀을 클릭하면 여기에 표시됩니다.")
+                return
+
+            sorted_centers = sorted(
+                st.session_state.clicked_centers.values(),
+                key=lambda x: x.get("count", 0),
+                reverse=True
+            )
+
+            top5 = sorted_centers[:5]
+            for i, item in enumerate(top5, 1):
+                st.write(f"{i}. {item.get('name', '지점')} ({item.get('count', 0)}회)")
+
+    # 첫 렌더 (클릭 처리 전 상태)
+    render_top5(top5_placeholder)
+
 should_search = search_query or selected_service_cols or (selected_region != "(전체)")
 
 if should_search:
@@ -635,6 +697,35 @@ if should_search:
 
     if data_list:
         add_markers_to_map(m, data_list, user_lat, user_lng)
+
+        # Streamlit에 지도 렌더링
+        map_out = st_folium(m, height=500, use_container_width=True)
+
+        # ✅ 핀 클릭했을 때 처리
+        clicked = map_out.get("last_object_clicked")
+        if clicked and data_list:
+            clicked_lat = clicked.get("lat")
+            clicked_lng = clicked.get("lng")
+
+            # ✅ 같은 클릭(좌표)이 rerun으로 다시 들어오면 무시
+            # 소수점 자리수는 너무 길면 흔들릴 수 있어서 반올림해서 키를 만듦
+            click_key = (round(clicked_lat, 6), round(clicked_lng, 6))
+
+            if st.session_state.last_click_key != click_key:
+                st.session_state.last_click_key = click_key
+
+                center_row = find_clicked_center_by_latlng(clicked_lat, clicked_lng, data_list)
+                if center_row:
+                    cid = center_row.get("id")
+                    cname = center_row.get("name", "지점")
+
+                    if cid not in st.session_state.clicked_centers:
+                        st.session_state.clicked_centers[cid] = {"id": cid, "name": cname, "count": 1}
+                    else:
+                        st.session_state.clicked_centers[cid]["count"] += 1
+
+                    # ✅ TOP5 즉시 갱신
+                    render_top5(top5_placeholder)
 
     # 지도 출력
     st_folium(m, height=500, use_container_width=True)
