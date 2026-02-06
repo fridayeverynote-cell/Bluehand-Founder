@@ -169,6 +169,13 @@ st.markdown("""
         justify-content: center !important;
         align-items: center !important;
     }
+
+    /* 12. 사이드바 너비 고정 */
+    section[data-testid="stSidebar"] {
+        width: 350px !important;
+        min-width: 350px !important;
+        max-width: 350px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -177,7 +184,7 @@ FILTER_OPTIONS = {
     "is_ev": "⚡ 전기차 전담",
     "is_hydrogen": "💧 수소차 전담",
     "is_frame": "🔨 판금/차체 수리",
-    "is_excellent": "🏆 우수 협력점",
+    "is_cs_excellent": "🏆 우수 협력점",
     "is_n_line": "🏎️ N-Line 전담",
 }
 # SQL 쿼리 작성 시 SELECT 절에 넣기 위해 키값들을 쉼표로 연결한 문자열 생성
@@ -387,7 +394,6 @@ def render_paginated_table(rows_all: list[dict]):
     end_idx = start_idx + PAGE_SIZE
 
     # 카드형 컨테이너 안에 테이블 렌더링
-    st.markdown('<div class="stCard">', unsafe_allow_html=True)
     render_hy_table_page(rows_all[start_idx:end_idx])
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -462,7 +468,7 @@ def get_regions():
     try:
         conn = get_conn()
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM regions ORDER BY id")
+        cursor.execute("SELECT name FROM bluehands_db.regions ORDER BY id")
         return [row[0] for row in cursor.fetchall()]
     except:
         return []
@@ -534,7 +540,8 @@ st.markdown("""
 
 # (1) GPS 확인 로직
 # 브라우저의 Geolocation API를 사용하여 현재 위치 좌표 획득
-loc = get_geolocation()
+# [수정] duplicate key 에러 해결을 위해 key 파라미터를 'component_key'로 변경
+loc = get_geolocation(component_key="main_geolocation")
 user_lat, user_lng = None, None
 if loc and 'coords' in loc:
     user_lat, user_lng = loc['coords']['latitude'], loc['coords']['longitude']
@@ -606,7 +613,6 @@ if should_search:
         map_center = [user_lat, user_lng]
 
     # 지도 생성 및 마커 추가 (카드형 컨테이너 적용)
-    st.markdown('<div class="stCard">', unsafe_allow_html=True)
     m = folium.Map(location=map_center, zoom_start=13)
     LocateControl().add_to(m)  # 현재 위치 찾기 버튼 추가
 
@@ -629,7 +635,6 @@ else:
     st.info("👈 왼쪽 사이드바에서 원하는 지역과 정비 옵션을 선택하거나, 지점명을 검색해보세요.")
 
     # 초기 화면 지도: 기본 위치(강남역) 보여줌
-    st.markdown('<div class="stCard">', unsafe_allow_html=True)
     m = folium.Map(location=[37.4979, 127.0276], zoom_start=13)
     st_folium(m, height=450, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)

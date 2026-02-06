@@ -74,3 +74,5 @@ CREATE TABLE bluehands (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+ALTER TABLE bluehands
+DROP COLUMN is_excellent;
