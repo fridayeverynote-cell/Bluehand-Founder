@@ -10,8 +10,6 @@ import streamlit.components.v1 as components  # 커스텀 HTML이나 JavaScript(
 from math import radians, cos, sin, asin, sqrt  # 두 지점(위도, 경도) 사이의 거리를 계산하는 하버사인(Haversine) 공식에 필요한 수학 함수들
 from streamlit_js_eval import get_geolocation  # 웹 브라우저의 GPS API를 호출하여 사용자의 현재 위도/경도를 가져오는 라이브러리
 from dotenv import load_dotenv  # .env 파일에 저장된 민감한 정보(DB 비밀번호, API 키 등)를 환경변수로 로드하여 보안을 유지하는 라이브러리
-import time  # ✅ 추가
-
 
 # .env 파일에서 환경 변수(DB 접속 정보 등)를 로드합니다.
 load_dotenv()
@@ -208,6 +206,10 @@ PAGE_SIZE = 5
 # 최근 클릭한 센터(최대 5개) 저장
 if "clicked_centers" not in st.session_state:
     st.session_state.clicked_centers = {}  # {bluehands_id: {"id":.., "name":.., "count":..}}
+
+if "last_click_key" not in st.session_state:
+    st.session_state.last_click_key = None
+
 
 
 # -----------------------------------------------------------------------------
@@ -706,7 +708,7 @@ if should_search:
             cname = center_row.get("name", "지점")
 
             # 중복이면 기존 항목 제거 후 맨 앞에 재삽입 (다빈도 클릭 우선)
-            if cid not in st.session_state.clicked_centers:
+            if cid not in st.session_state. clicked_centers:
                 st.session_state.clicked_centers[cid] = {
                     "id": cid,
                     "name": cname,
