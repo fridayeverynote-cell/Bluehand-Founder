@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="Hyundai.jpeg" width="512" height="512" style="border-radius: 50%; object-fit: cover; object-position: center;" />
+  <img src="Hyundai.jpg" width="512" height="512" style="border-radius: 50%; object-fit: cover; object-position: center;" />
   <br/>
 
 # 🚘 블루핸즈 통합 검색 서비스 (Bluehands Finder)
