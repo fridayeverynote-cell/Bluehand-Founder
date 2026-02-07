@@ -214,8 +214,8 @@ streamlit run final.py # 최종 실행 파일은 final.py 입니다.
 <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd; margin-bottom: 30px;">
     <thead>
         <tr style="background-color: #f8f9fa;">
-            <th style="width: 15%; border: 1px solid #ddd; padding: 10px;">대상자</th>
             <th style="width: 15%; border: 1px solid #ddd; padding: 10px;">작성자</th>
+            <th style="width: 15%; border: 1px solid #ddd; padding: 10px;">대상자</th>
             <th style="border: 1px solid #ddd; padding: 10px;">회고 내용</th>
         </tr>
     </thead>
@@ -289,23 +289,33 @@ streamlit run final.py # 최종 실행 파일은 final.py 입니다.
         <tr>
             <td rowspan="5" style="text-align: center; font-weight: bold; border: 1px solid #ddd;">전종혁</td>
             <td style="text-align: center; border: 1px solid #ddd;">김용욱</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">작성해주실곳</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">
+                개인 사정으로 하루 부재가 있어 진도를 맞추기 부담스러우셨을 텐데도, 복귀 후 흐름을 빠르게 파악하고 발표 자료를 훌륭하게 완성해 주셨습니다. 끝까지 책임감 있게 참여해 주셔서 감사합니다.
+            </td>
         </tr>
         <tr>
             <td style="text-align: center; border: 1px solid #ddd;">김이선</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">작성해주실곳</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">
+                검색 기능과 누적 데이터 처리, 그리고 파이썬 워드클라우드 구현 등 프로젝트의 핵심 기능을 주도적으로 맡아주셨습니다. 프로젝트 기간 동안 기술적으로 크게 성장하시는 모습이 매우 인상적이었습니다.
+            </td>
         </tr>
         <tr>
             <td style="text-align: center; border: 1px solid #ddd;">위희찬</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">작성해주실곳</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">
+                마커 기능 구현과 UI/UX 등 시각적인 부분에서 큰 기여를 해주셨습니다. 특히 기획 단계에서 핵심 기능에 대한 다양한 아이디어를 적극적으로 제시해 주셔서 프로젝트의 방향성을 잡는 데 큰 도움이 되었습니다.
+            </td>
         </tr>
         <tr>
             <td style="text-align: center; border: 1px solid #ddd;">이선호</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">작성해주실곳</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">
+                자신의 현재 역량을 객관적으로 파악하고, 부족한 부분은 개인 학습을 통해 채워나가려는 열정이 돋보였습니다. 포기하지 않고 끝까지 따라오며 성장하려는 태도가 팀 분위기에 긍정적인 영향을 주었습니다.
+            </td>
         </tr>
         <tr>
             <td style="text-align: center; border: 1px solid #ddd;">전승권</td>
-            <td style="border: 1px solid #ddd; padding: 10px;">작성해주실곳</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">
+                개발 중 발생하는 크고 작은 오류들을 해결하는 데 중추적인 역할을 해주셨습니다. 팀이 잘못된 방향으로 가지 않도록 중심을 잡아주신 덕분에 프로젝트를 안정적으로 마무리할 수 있었습니다.
+            </td>
         </tr>
     </tbody>
 </table>
